@@ -69,17 +69,48 @@ export async function uploadResumeHandler(req, res) {
       return res.status(400).json({ message: "No file uploaded. Please upload a PDF." });
     }
 
-    const resumeUrl = `/uploads/resumes/${req.file.filename}`;
+    const userId = req.user.userId;
+    const resumeUrl = `/api/profile/resume/${userId}`;
 
     const user = await prisma.user.update({
-      where: { id: req.user.userId },
-      data: { resumeUrl },
+      where: { id: userId },
+      data: {
+        resumeData: req.file.buffer,
+        resumeName: req.file.originalname,
+        resumeUrl,
+      },
       select: PROFILE_FIELDS,
     });
 
     res.json(user);
   } catch (error) {
     console.error("Upload resume error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
+export async function serveResume(req, res) {
+  try {
+    const { userId } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { resumeData: true, resumeName: true },
+    });
+
+    if (!user || !user.resumeData) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+
+    const filename = user.resumeName || "resume.pdf";
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename="${filename}"`,
+      "Content-Length": user.resumeData.length,
+    });
+    res.send(user.resumeData);
+  } catch (error) {
+    console.error("Serve resume error:", error);
     res.status(500).json({ message: "Something went wrong" });
   }
 }

@@ -7,6 +7,7 @@ import {
   getMyProfile,
   updateProfile,
   uploadResumeHandler,
+  serveResume,
   getUserProfile,
 } from "../controllers/profile.controller.js";
 
@@ -31,6 +32,7 @@ function handleUpload(req, res, next) {
 router.get("/", authenticate, getMyProfile);
 router.put("/", authenticate, updateProfile);
 router.post("/resume", authenticate, handleUpload, uploadResumeHandler);
+router.get("/resume/:userId", authenticate, serveResume);
 router.get("/:userId", authenticate, requireAdmin, getUserProfile);
 
 export default router;

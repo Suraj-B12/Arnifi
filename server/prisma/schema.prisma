@@ -18,6 +18,8 @@ model User {
   experience   String?
   education    String?
   resumeUrl    String?
+  resumeData   Bytes?
+  resumeName   String?
   phone        String?
   linkedIn     String?
   bio          String?
