@@ -24,6 +24,9 @@ model Job {
   position     String
   type         JobType
   location     String
+  description  String?
+  salary       String?
+  requirements String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   postedBy     User          @relation(fields: [postedById], references: [id])
@@ -34,16 +37,20 @@ model Job {
 }
 
 model Application {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId     String
-  createdAt DateTime @default(now())
+  id         String            @id @default(cuid())
+  user       User              @relation(fields: [userId], references: [id])
+  userId     String
+  job        Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId      String
+  status     ApplicationStatus @default(PENDING)
+  reviewedAt DateTime?
+  notes      String?
+  createdAt  DateTime          @default(now())
 
   @@unique([userId, jobId])
   @@index([userId])
   @@index([jobId])
+  @@index([status])
 }
 
 enum Role {
@@ -54,4 +61,12 @@ enum Role {
 enum JobType {
   FULL_TIME
   PART_TIME
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  INTERVIEW
+  OFFER
+  REJECTED
 }
