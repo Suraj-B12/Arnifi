@@ -29,12 +29,10 @@ services:
       - key: CLIENT_URL
         sync: false
 
-  # Frontend
+  # Frontend (static site - no region/plan allowed)
   - type: web
     name: arnifi-app
     runtime: static
-    region: oregon
-    plan: free
     rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
