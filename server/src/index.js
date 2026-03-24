@@ -3,6 +3,7 @@ import cors from "cors";
 import { PORT, CLIENT_URL } from "./config/env.js";
 import authRoutes from "./routes/auth.routes.js";
 import jobsRoutes from "./routes/jobs.routes.js";
+import applicationsRoutes from "./routes/applications.routes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/api/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobsRoutes);
+app.use("/api/applications", applicationsRoutes);
 
 // Start server
 app.listen(PORT, () => {
