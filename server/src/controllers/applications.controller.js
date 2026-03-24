@@ -32,6 +32,73 @@ export async function applyToJob(req, res) {
   }
 }
 
+const VALID_STATUSES = ["PENDING", "REVIEWED", "INTERVIEW", "OFFER", "REJECTED"];
+
+export async function getJobApplications(req, res) {
+  try {
+    const { id: jobId } = req.params;
+
+    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+    if (job.postedById !== req.user.userId) {
+      return res.status(403).json({ message: "You can only view applicants for your own postings" });
+    }
+
+    const applications = await prisma.application.findMany({
+      where: { jobId },
+      include: { user: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(applications);
+  } catch (error) {
+    console.error("Get job applications error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
+export async function updateApplicationStatus(req, res) {
+  try {
+    const { id: jobId, appId } = req.params;
+    const { status, notes } = req.body;
+
+    if (!status || !VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+    }
+
+    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    if (!job || job.postedById !== req.user.userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const application = await prisma.application.findUnique({ where: { id: appId } });
+    if (!application || application.jobId !== jobId) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    const data = { status };
+    if (application.status === "PENDING" && status !== "PENDING") {
+      data.reviewedAt = new Date();
+    }
+    if (notes !== undefined) {
+      data.notes = notes;
+    }
+
+    const updated = await prisma.application.update({
+      where: { id: appId },
+      data,
+      include: { user: { select: { id: true, name: true, email: true } } },
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error("Update application status error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
 export async function getApplications(req, res) {
   try {
     const applications = await prisma.application.findMany({

@@ -1,14 +1,17 @@
 import prisma from "../lib/prisma.js";
 
-function sanitize(str) {
-  return str.replace(/<[^>]*>/g, "").trim().slice(0, 200);
+function sanitize(str, maxLen = 200) {
+  return str.replace(/<[^>]*>/g, "").trim().slice(0, maxLen);
 }
 
 export async function getAllJobs(req, res) {
   try {
     const jobs = await prisma.job.findMany({
       orderBy: { createdAt: "desc" },
-      include: { postedBy: { select: { id: true, name: true } } },
+      include: {
+        postedBy: { select: { id: true, name: true } },
+        _count: { select: { applications: true } },
+      },
     });
     res.json(jobs);
   } catch (error) {
@@ -19,7 +22,7 @@ export async function getAllJobs(req, res) {
 
 export async function createJob(req, res) {
   try {
-    const { companyName, position, type, location } = req.body;
+    const { companyName, position, type, location, description, salary, requirements } = req.body;
 
     if (!companyName || !position || !type || !location) {
       return res.status(400).json({ message: "All fields are required" });
@@ -35,6 +38,9 @@ export async function createJob(req, res) {
         position: sanitize(position),
         type,
         location: sanitize(location),
+        ...(description && { description: sanitize(description, 2000) }),
+        ...(salary && { salary: sanitize(salary) }),
+        ...(requirements && { requirements: sanitize(requirements, 1000) }),
         postedById: req.user.userId,
       },
       include: { postedBy: { select: { id: true, name: true } } },
@@ -50,7 +56,7 @@ export async function createJob(req, res) {
 export async function updateJob(req, res) {
   try {
     const { id } = req.params;
-    const { companyName, position, type, location } = req.body;
+    const { companyName, position, type, location, description, salary, requirements } = req.body;
 
     const job = await prisma.job.findUnique({ where: { id } });
     if (!job) {
@@ -72,6 +78,9 @@ export async function updateJob(req, res) {
         ...(position && { position: sanitize(position) }),
         ...(type && { type }),
         ...(location && { location: sanitize(location) }),
+        ...(description !== undefined && { description: description ? sanitize(description, 2000) : null }),
+        ...(salary !== undefined && { salary: salary ? sanitize(salary) : null }),
+        ...(requirements !== undefined && { requirements: requirements ? sanitize(requirements, 1000) : null }),
       },
       include: { postedBy: { select: { id: true, name: true } } },
     });
