@@ -32,7 +32,8 @@ export async function applyToJob(req, res) {
   }
 }
 
-const VALID_STATUSES = ["PENDING", "REVIEWED", "INTERVIEW", "OFFER", "REJECTED"];
+const VALID_STATUSES = ["PENDING", "REVIEWED", "INTERVIEW", "OFFER", "REJECTED", "WITHDRAWN"];
+const ADMIN_SETTABLE_STATUSES = ["PENDING", "REVIEWED", "INTERVIEW", "OFFER", "REJECTED"];
 
 export async function getJobApplications(req, res) {
   try {
@@ -48,7 +49,7 @@ export async function getJobApplications(req, res) {
 
     const applications = await prisma.application.findMany({
       where: { jobId },
-      include: { user: { select: { id: true, name: true, email: true } } },
+      include: { user: { select: { id: true, name: true, email: true, headline: true, skills: true, resumeUrl: true, experience: true, education: true } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -62,10 +63,10 @@ export async function getJobApplications(req, res) {
 export async function updateApplicationStatus(req, res) {
   try {
     const { id: jobId, appId } = req.params;
-    const { status, notes } = req.body;
+    const { status, statusNote, adminNotes } = req.body;
 
-    if (!status || !VALID_STATUSES.includes(status)) {
-      return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+    if (!status || !ADMIN_SETTABLE_STATUSES.includes(status)) {
+      return res.status(400).json({ message: `Status must be one of: ${ADMIN_SETTABLE_STATUSES.join(", ")}` });
     }
 
     const job = await prisma.job.findUnique({ where: { id: jobId } });
@@ -82,8 +83,11 @@ export async function updateApplicationStatus(req, res) {
     if (application.status === "PENDING" && status !== "PENDING") {
       data.reviewedAt = new Date();
     }
-    if (notes !== undefined) {
-      data.notes = notes;
+    if (statusNote !== undefined) {
+      data.statusNote = statusNote;
+    }
+    if (adminNotes !== undefined) {
+      data.adminNotes = adminNotes;
     }
 
     const updated = await prisma.application.update({
@@ -111,9 +115,41 @@ export async function getApplications(req, res) {
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(applications);
+    // Include statusNote for applicants but strip adminNotes (admin-only)
+    const sanitized = applications.map(({ adminNotes, ...app }) => app);
+
+    res.json(sanitized);
   } catch (error) {
     console.error("Get applications error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
+export async function withdrawApplication(req, res) {
+  try {
+    const { appId } = req.params;
+    const userId = req.user.userId;
+
+    const application = await prisma.application.findUnique({ where: { id: appId } });
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+    if (application.userId !== userId) {
+      return res.status(403).json({ message: "You can only withdraw your own applications" });
+    }
+    if (application.status !== "PENDING") {
+      return res.status(400).json({ message: "Only pending applications can be withdrawn" });
+    }
+
+    const updated = await prisma.application.update({
+      where: { id: appId },
+      data: { status: "WITHDRAWN", withdrawnAt: new Date() },
+      include: { job: true },
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error("Withdraw application error:", error);
     res.status(500).json({ message: "Something went wrong" });
   }
 }

@@ -1,10 +1,18 @@
+import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
 import { JWT_SECRET } from "../config/env.js";
 
 const SALT_ROUNDS = 12;
-const JWT_EXPIRES_IN = "7d";
+const JWT_EXPIRES_IN = "15m";
+
+async function generateRefreshToken(userId) {
+  const token = crypto.randomBytes(40).toString("hex");
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  await prisma.refreshToken.create({ data: { token, userId, expiresAt } });
+  return token;
+}
 
 export async function signup(req, res) {
   try {
@@ -47,8 +55,11 @@ export async function signup(req, res) {
       expiresIn: JWT_EXPIRES_IN,
     });
 
+    const refreshToken = await generateRefreshToken(user.id);
+
     res.status(201).json({
       token,
+      refreshToken,
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
@@ -79,12 +90,73 @@ export async function login(req, res) {
       expiresIn: JWT_EXPIRES_IN,
     });
 
+    const refreshToken = await generateRefreshToken(user.id);
+
     res.json({
       token,
+      refreshToken,
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
+export async function refreshTokenHandler(req, res) {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Refresh token is required" });
+    }
+
+    const stored = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+
+    if (!stored || stored.expiresAt < new Date()) {
+      if (stored) {
+        await prisma.refreshToken.delete({ where: { id: stored.id } });
+      }
+      return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
+    // Delete old refresh token (rotation)
+    await prisma.refreshToken.delete({ where: { id: stored.id } });
+
+    // Generate new access token + refresh token
+    const token = jwt.sign(
+      { userId: stored.user.id, role: stored.user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    const newRefreshToken = await generateRefreshToken(stored.user.id);
+
+    res.json({
+      token,
+      refreshToken: newRefreshToken,
+      user: {
+        id: stored.user.id,
+        name: stored.user.name,
+        email: stored.user.email,
+        role: stored.user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Refresh token error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
+export async function logoutAll(req, res) {
+  try {
+    await prisma.refreshToken.deleteMany({ where: { userId: req.user.userId } });
+    res.json({ message: "Logged out from all devices" });
+  } catch (error) {
+    console.error("Logout error:", error);
     res.status(500).json({ message: "Something went wrong" });
   }
 }
