@@ -151,8 +151,8 @@ export default function PostJobPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white
-                       shadow-sm hover:bg-primary-hover active:scale-[0.98] transition-all duration-150
+            className="w-full rounded-xl bg-cta px-4 py-3 text-sm font-semibold text-white
+                       shadow-sm hover:bg-cta-hover active:scale-[0.98] transition-all duration-150
                        disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Posting..." : "Post Job"}

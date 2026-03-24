@@ -1,11 +1,11 @@
 import { useGetJobApplicationsQuery, useUpdateApplicationStatusMutation } from "../jobs/jobsApi";
 
 const statusOptions = [
-  { value: "PENDING", label: "Pending", cls: "bg-gray-100 text-gray-700" },
-  { value: "REVIEWED", label: "Reviewed", cls: "bg-blue-100 text-blue-700" },
-  { value: "INTERVIEW", label: "Interview", cls: "bg-amber-100 text-amber-800" },
-  { value: "OFFER", label: "Offer", cls: "bg-green-100 text-green-700" },
-  { value: "REJECTED", label: "Rejected", cls: "bg-red-100 text-red-700" },
+  { value: "PENDING", label: "● Pending", cls: "bg-gray-800 text-white" },
+  { value: "REVIEWED", label: "○ Reviewed", cls: "bg-blue-600 text-white" },
+  { value: "INTERVIEW", label: "◇ Interview", cls: "bg-amber-500 text-white" },
+  { value: "OFFER", label: "✓ Offer", cls: "bg-emerald-600 text-white" },
+  { value: "REJECTED", label: "✕ Rejected", cls: "bg-gray-400 text-white" },
 ];
 
 export default function ApplicantsModal({ job, onClose }) {
@@ -73,7 +73,7 @@ export default function ApplicantsModal({ job, onClose }) {
                     <select
                       value={app.status}
                       onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                      className={`rounded-lg border-0 px-3 py-1.5 text-xs font-medium cursor-pointer
+                      className={`rounded-full border-0 px-3 py-1.5 text-xs font-medium cursor-pointer
                                   focus:outline-none focus:ring-2 focus:ring-primary-ring transition ${current.cls}`}
                     >
                       {statusOptions.map((opt) => (

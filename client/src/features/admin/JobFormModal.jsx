@@ -164,8 +164,8 @@ export default function JobFormModal({ job, onSubmit, onClose, title }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white
-                         shadow-sm hover:bg-primary-hover active:scale-[0.98] transition-all duration-150
+              className="flex-1 rounded-xl bg-cta px-4 py-2.5 text-sm font-semibold text-white
+                         shadow-sm hover:bg-cta-hover active:scale-[0.98] transition-all duration-150
                          disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Saving..." : "Save"}

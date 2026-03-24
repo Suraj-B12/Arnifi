@@ -6,7 +6,7 @@ import { api } from "../app/api";
 
 const linkBase =
   "px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150";
-const linkActive = "bg-primary-light text-primary";
+const linkActive = "bg-primary-light text-primary font-semibold";
 const linkInactive = "text-gray-600 hover:text-gray-900 hover:bg-gray-100";
 
 export default function Navbar() {

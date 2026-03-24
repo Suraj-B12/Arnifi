@@ -6,8 +6,8 @@ import JobFormModal from "./JobFormModal";
 import ApplicantsModal from "./ApplicantsModal";
 
 const typeBadge = {
-  FULL_TIME: { label: "Full-time", cls: "bg-blue-100 text-blue-800" },
-  PART_TIME: { label: "Part-time", cls: "bg-purple-100 text-purple-800" },
+  FULL_TIME: { label: "Full-time", cls: "bg-primary-light text-primary border border-primary-ring/40" },
+  PART_TIME: { label: "Part-time", cls: "bg-amber-50 text-amber-700 border border-amber-200" },
 };
 
 export default function AdminDashboard() {
@@ -48,8 +48,8 @@ export default function AdminDashboard() {
         </div>
         <a
           href="/admin/post-job"
-          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white
-                     shadow-sm hover:bg-primary-hover active:scale-[0.98] transition-all duration-150"
+          className="rounded-xl bg-cta px-5 py-2.5 text-sm font-semibold text-white
+                     shadow-sm hover:bg-cta-hover active:scale-[0.98] transition-all duration-150"
         >
           + Post Job
         </a>
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
                         onClick={() => setViewingApplicants(job)}
                         className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition"
                       >
-                        <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-full bg-primary/10 px-2 text-xs font-bold text-primary">
+                        <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-full bg-primary-light px-2 text-xs font-bold text-primary">
                           {appCount}
                         </span>
                         View

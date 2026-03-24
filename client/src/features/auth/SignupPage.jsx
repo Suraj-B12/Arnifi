@@ -113,9 +113,9 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white
-                     shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2
-                     focus-visible:outline-offset-2 focus-visible:outline-primary
+          className="w-full rounded-xl bg-cta px-4 py-3 text-sm font-semibold text-white
+                     shadow-sm hover:bg-cta-hover focus-visible:outline focus-visible:outline-2
+                     focus-visible:outline-offset-2 focus-visible:outline-cta
                      disabled:opacity-50 disabled:cursor-not-allowed
                      active:scale-[0.98] transition-all duration-150"
         >

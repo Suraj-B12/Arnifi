@@ -1,16 +1,16 @@
 import { useGetApplicationsQuery } from "./applicationsApi";
 
 const typeBadge = {
-  FULL_TIME: { label: "Full-time", cls: "bg-blue-100 text-blue-800" },
-  PART_TIME: { label: "Part-time", cls: "bg-purple-100 text-purple-800" },
+  FULL_TIME: { label: "Full-time", cls: "bg-primary-light text-primary border border-primary-ring/40" },
+  PART_TIME: { label: "Part-time", cls: "bg-amber-50 text-amber-700 border border-amber-200" },
 };
 
 const statusBadge = {
-  PENDING:   { label: "Awaiting Review", cls: "bg-gray-100 text-gray-700" },
-  REVIEWED:  { label: "Under Review",   cls: "bg-blue-100 text-blue-700" },
-  INTERVIEW: { label: "Interview Stage", cls: "bg-amber-100 text-amber-800" },
-  OFFER:     { label: "Offer Extended",  cls: "bg-green-100 text-green-700" },
-  REJECTED:  { label: "Not Selected",    cls: "bg-red-50 text-red-600" },
+  PENDING:   { label: "Awaiting Review", icon: "●", cls: "inline-flex items-center gap-1.5 rounded-full bg-gray-800 px-3 py-1 text-xs font-medium text-white" },
+  REVIEWED:  { label: "Under Review",   icon: "○", cls: "inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white" },
+  INTERVIEW: { label: "Interview Stage", icon: "◇", cls: "inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white" },
+  OFFER:     { label: "Offer Extended",  icon: "✓", cls: "inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-medium text-white" },
+  REJECTED:  { label: "Not Selected",    icon: "✕", cls: "inline-flex items-center gap-1.5 rounded-full bg-gray-400 px-3 py-1 text-xs font-medium text-white" },
 };
 
 function SkeletonRow() {
@@ -82,8 +82,8 @@ export default function AppliedJobsPage() {
                       <h3 className="text-base font-semibold font-heading text-gray-900 truncate">
                         {app.job.position}
                       </h3>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sBadge.cls}`}>
-                        {sBadge.label}
+                      <span className={sBadge.cls}>
+                        <span>{sBadge.icon}</span>{sBadge.label}
                       </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">

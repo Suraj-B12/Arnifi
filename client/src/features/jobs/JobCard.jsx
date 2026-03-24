@@ -1,6 +1,6 @@
 const typeBadge = {
-  FULL_TIME: { label: "Full-time", cls: "bg-blue-100 text-blue-800" },
-  PART_TIME: { label: "Part-time", cls: "bg-purple-100 text-purple-800" },
+  FULL_TIME: { label: "Full-time", cls: "bg-primary-light text-primary border border-primary-ring/40" },
+  PART_TIME: { label: "Part-time", cls: "bg-amber-50 text-amber-700 border border-amber-200" },
 };
 
 export default function JobCard({ job, onApply, applying, applied, isAdmin }) {
@@ -9,7 +9,7 @@ export default function JobCard({ job, onApply, applying, applied, isAdmin }) {
 
   return (
     <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm
-                    transition-all duration-200 hover:shadow-md hover:border-primary-ring">
+                    transition-all duration-200 hover:shadow-md hover:border-gray-300">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-semibold font-heading text-gray-900 truncate">
