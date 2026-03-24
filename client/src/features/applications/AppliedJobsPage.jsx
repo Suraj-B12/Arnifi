@@ -1,8 +1,13 @@
-import { useGetApplicationsQuery } from "./applicationsApi";
+import { useState } from "react";
+import { useGetApplicationsQuery, useWithdrawApplicationMutation } from "./applicationsApi";
 
 const typeBadge = {
-  FULL_TIME: { label: "Full-time", cls: "bg-primary-light text-primary border border-primary-ring/40" },
-  PART_TIME: { label: "Part-time", cls: "bg-amber-50 text-amber-700 border border-amber-200" },
+  FULL_TIME:   { label: "Full-time",   cls: "bg-primary-light text-primary border border-primary-ring/40" },
+  PART_TIME:   { label: "Part-time",   cls: "bg-amber-50 text-amber-700 border border-amber-200" },
+  CONTRACT:    { label: "Contract",    cls: "bg-purple-50 text-purple-700 border border-purple-200" },
+  INTERNSHIP:  { label: "Internship",  cls: "bg-indigo-50 text-indigo-700 border border-indigo-200" },
+  REMOTE:      { label: "Remote",      cls: "bg-cyan-50 text-cyan-700 border border-cyan-200" },
+  HYBRID:      { label: "Hybrid",      cls: "bg-violet-50 text-violet-700 border border-violet-200" },
 };
 
 const statusBadge = {
@@ -11,6 +16,7 @@ const statusBadge = {
   INTERVIEW: { label: "Interview Stage", icon: "◇", cls: "inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white" },
   OFFER:     { label: "Offer Extended",  icon: "✓", cls: "inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-medium text-white" },
   REJECTED:  { label: "Not Selected",    icon: "✕", cls: "inline-flex items-center gap-1.5 rounded-full bg-gray-400 px-3 py-1 text-xs font-medium text-white" },
+  WITHDRAWN: { label: "Withdrawn",       icon: "↩", cls: "inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1 text-xs font-medium text-white" },
 };
 
 function SkeletonRow() {
@@ -27,6 +33,17 @@ function SkeletonRow() {
 
 export default function AppliedJobsPage() {
   const { data: applications = [], isLoading, isError } = useGetApplicationsQuery();
+  const [withdrawApplication, { isLoading: isWithdrawing }] = useWithdrawApplicationMutation();
+  const [confirmWithdrawId, setConfirmWithdrawId] = useState(null);
+
+  const handleWithdraw = async (appId) => {
+    try {
+      await withdrawApplication(appId).unwrap();
+    } catch {
+      // handled by RTK Query
+    }
+    setConfirmWithdrawId(null);
+  };
 
   return (
     <div>
@@ -60,9 +77,14 @@ export default function AppliedJobsPage() {
           </p>
           <a
             href="/jobs"
-            className="mt-4 inline-block text-sm font-medium text-primary hover:text-primary-hover transition"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-cta px-5 py-2.5
+                       text-sm font-semibold text-cta-text shadow-sm
+                       hover:bg-cta-hover active:scale-[0.98] transition-all duration-150"
           >
-            Browse jobs
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            Browse Jobs
           </a>
         </div>
       ) : (
@@ -115,6 +137,13 @@ export default function AppliedJobsPage() {
                   </div>
                 </div>
 
+                {/* Status note from admin */}
+                {app.statusNote && (
+                  <p className="mt-2 text-xs text-gray-500 italic">
+                    Note: {app.statusNote}
+                  </p>
+                )}
+
                 {/* Show reviewed date if available */}
                 {app.reviewedAt && (
                   <p className="mt-2 text-xs text-gray-400">
@@ -122,6 +151,41 @@ export default function AppliedJobsPage() {
                       month: "short", day: "numeric", year: "numeric",
                     })}
                   </p>
+                )}
+
+                {/* Withdraw button for pending applications */}
+                {app.status === "PENDING" && (
+                  <div className="mt-3">
+                    {confirmWithdrawId === app.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Withdraw this application?</span>
+                        <button
+                          onClick={() => handleWithdraw(app.id)}
+                          disabled={isWithdrawing}
+                          className="rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white
+                                     hover:bg-red-600 active:scale-[0.97] transition-all duration-150
+                                     disabled:opacity-50"
+                        >
+                          {isWithdrawing ? "Withdrawing..." : "Confirm"}
+                        </button>
+                        <button
+                          onClick={() => setConfirmWithdrawId(null)}
+                          className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-600
+                                     hover:bg-gray-300 transition-all duration-150"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmWithdrawId(app.id)}
+                        className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-600
+                                   hover:bg-red-100 active:scale-[0.97] transition-all duration-150"
+                      >
+                        Withdraw
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             );

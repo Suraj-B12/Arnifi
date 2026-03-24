@@ -26,11 +26,13 @@ export default function Navbar() {
     ? [
         { to: "/admin/dashboard", label: "Dashboard" },
         { to: "/admin/post-job", label: "Post Job" },
+        { to: "/admin/analytics", label: "Analytics" },
         { to: "/jobs", label: "All Jobs" },
       ]
     : [
         { to: "/jobs", label: "Browse Jobs" },
         { to: "/applied", label: "My Applications" },
+        { to: "/profile", label: "My Profile" },
       ];
 
   return (

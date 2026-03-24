@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useGetJobApplicationsQuery, useUpdateApplicationStatusMutation } from "../jobs/jobsApi";
+import ApplicantProfileModal from "./ApplicantProfileModal";
 
 const statusOptions = [
   { value: "PENDING", label: "● Pending", cls: "bg-gray-800 text-white" },
@@ -6,15 +8,42 @@ const statusOptions = [
   { value: "INTERVIEW", label: "◇ Interview", cls: "bg-amber-500 text-white" },
   { value: "OFFER", label: "✓ Offer", cls: "bg-emerald-600 text-white" },
   { value: "REJECTED", label: "✕ Rejected", cls: "bg-gray-400 text-white" },
+  { value: "WITHDRAWN", label: "↩ Withdrawn", cls: "bg-orange-500 text-white" },
 ];
 
 export default function ApplicantsModal({ job, onClose }) {
   const { data: applicants = [], isLoading } = useGetJobApplicationsQuery(job.id);
   const [updateStatus] = useUpdateApplicationStatusMutation();
+  const [notes, setNotes] = useState({});
+  const [viewingProfile, setViewingProfile] = useState(null);
+
+  const getNote = (appId, field) => notes[appId]?.[field] ?? "";
+  const setNote = (appId, field, value) =>
+    setNotes((prev) => ({ ...prev, [appId]: { ...prev[appId], [field]: value } }));
 
   const handleStatusChange = async (appId, status) => {
     try {
-      await updateStatus({ jobId: job.id, appId, status }).unwrap();
+      await updateStatus({
+        jobId: job.id,
+        appId,
+        status,
+        statusNote: notes[appId]?.statusNote,
+        adminNotes: notes[appId]?.adminNotes,
+      }).unwrap();
+    } catch {
+      // handled by RTK Query
+    }
+  };
+
+  const handleSaveNotes = async (appId, currentStatus) => {
+    try {
+      await updateStatus({
+        jobId: job.id,
+        appId,
+        status: currentStatus,
+        statusNote: notes[appId]?.statusNote,
+        adminNotes: notes[appId]?.adminNotes,
+      }).unwrap();
     } catch {
       // handled by RTK Query
     }
@@ -55,31 +84,88 @@ export default function ApplicantsModal({ job, onClose }) {
             <div className="space-y-3">
               {applicants.map((app) => {
                 const current = statusOptions.find((s) => s.value === app.status) || statusOptions[0];
+                const isWithdrawn = app.status === "WITHDRAWN";
                 return (
                   <div
                     key={app.id}
-                    className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4
+                    className="rounded-xl border border-gray-200 bg-white p-4
                                hover:border-gray-300 transition"
                   >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">{app.user.name}</p>
-                      <p className="text-xs text-gray-500">{app.user.email}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        Applied {new Date(app.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
-                      </p>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <button
+                          onClick={() => setViewingProfile(app.user)}
+                          className="text-sm font-medium text-primary hover:text-primary-hover transition cursor-pointer truncate"
+                        >
+                          {app.user.name}
+                        </button>
+                        <p className="text-xs text-gray-500">{app.user.email}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Applied {new Date(app.createdAt).toLocaleDateString("en-US", {
+                            month: "short", day: "numeric", year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      {isWithdrawn ? (
+                        <span className={`rounded-full px-3 py-1.5 text-xs font-medium ${current.cls}`}>
+                          {current.label}
+                        </span>
+                      ) : (
+                        <select
+                          value={app.status}
+                          onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                          className={`rounded-full border-0 px-3 py-1.5 text-xs font-medium cursor-pointer
+                                      focus:outline-none focus:ring-2 focus:ring-primary-ring transition ${current.cls}`}
+                        >
+                          {statusOptions
+                            .filter((opt) => opt.value !== "WITHDRAWN")
+                            .map((opt) => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
+                      )}
                     </div>
-                    <select
-                      value={app.status}
-                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                      className={`rounded-full border-0 px-3 py-1.5 text-xs font-medium cursor-pointer
-                                  focus:outline-none focus:ring-2 focus:ring-primary-ring transition ${current.cls}`}
-                    >
-                      {statusOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+
+                    {/* Notes section */}
+                    <div className="mt-3 space-y-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                          Note for applicant — they will see this
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={getNote(app.id, "statusNote") || app.statusNote || ""}
+                          onChange={(e) => setNote(app.id, "statusNote", e.target.value)}
+                          placeholder="e.g. We'd like to schedule an interview next week..."
+                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700
+                                     placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-ring
+                                     focus:border-transparent resize-none transition"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                          Private notes — admin only
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={getNote(app.id, "adminNotes") || app.adminNotes || ""}
+                          onChange={(e) => setNote(app.id, "adminNotes", e.target.value)}
+                          placeholder="Internal notes about this applicant..."
+                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700
+                                     placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-ring
+                                     focus:border-transparent resize-none transition"
+                        />
+                      </div>
+                      {(notes[app.id]?.statusNote !== undefined || notes[app.id]?.adminNotes !== undefined) && (
+                        <button
+                          onClick={() => handleSaveNotes(app.id, app.status)}
+                          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white
+                                     hover:bg-primary-hover active:scale-[0.97] transition-all duration-150"
+                        >
+                          Save Notes
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -87,6 +173,13 @@ export default function ApplicantsModal({ job, onClose }) {
           )}
         </div>
       </div>
+
+      {viewingProfile && (
+        <ApplicantProfileModal
+          applicant={viewingProfile}
+          onClose={() => setViewingProfile(null)}
+        />
+      )}
     </div>
   );
 }

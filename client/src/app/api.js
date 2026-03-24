@@ -11,11 +11,41 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
+// Simple mutex to prevent parallel refresh races
+let refreshPromise = null;
+
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
+  let result = await baseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
-    api.dispatch({ type: "auth/logout" });
+    if (!refreshPromise) {
+      refreshPromise = (async () => {
+        const refreshToken = api.getState().auth.refreshToken;
+        if (!refreshToken) return null;
+
+        const refreshResult = await baseQuery(
+          { url: "/auth/refresh", method: "POST", body: { refreshToken } },
+          api,
+          extraOptions
+        );
+
+        if (refreshResult.data) {
+          api.dispatch({ type: "auth/setCredentials", payload: refreshResult.data });
+          return refreshResult.data;
+        } else {
+          api.dispatch({ type: "auth/logout" });
+          return null;
+        }
+      })();
+    }
+
+    const refreshData = await refreshPromise;
+    refreshPromise = null;
+
+    if (refreshData) {
+      // Retry original request with new token
+      result = await baseQuery(args, api, extraOptions);
+    }
   }
 
   return result;
@@ -23,6 +53,6 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Job", "Application"],
+  tagTypes: ["Job", "Application", "Profile", "Analytics", "Company"],
   endpoints: () => ({}),
 });

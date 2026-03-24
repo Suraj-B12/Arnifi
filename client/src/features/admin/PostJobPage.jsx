@@ -14,6 +14,8 @@ export default function PostJobPage() {
     description: "",
     salary: "",
     requirements: "",
+    interviewProcess: "",
+    benefits: "",
   });
   const [error, setError] = useState("");
 
@@ -104,6 +106,10 @@ export default function PostJobPage() {
             >
               <option value="FULL_TIME">Full-time</option>
               <option value="PART_TIME">Part-time</option>
+              <option value="CONTRACT">Contract</option>
+              <option value="INTERNSHIP">Internship</option>
+              <option value="REMOTE">Remote</option>
+              <option value="HYBRID">Hybrid</option>
             </select>
           </div>
 
@@ -142,6 +148,34 @@ export default function PostJobPage() {
               onChange={handleChange}
               rows={3}
               placeholder="e.g. React, Node.js, 2+ years experience"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Process <span className="text-gray-400 font-normal">(optional)</span></label>
+            <textarea
+              name="interviewProcess"
+              value={form.interviewProcess}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Describe the interview stages..."
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Benefits <span className="text-gray-400 font-normal">(optional)</span></label>
+            <textarea
+              name="benefits"
+              value={form.benefits}
+              onChange={handleChange}
+              rows={3}
+              placeholder="e.g. Health insurance, flexible hours, remote work..."
               className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
                          placeholder:text-gray-400 focus:border-primary focus:outline-none
                          focus:ring-2 focus:ring-primary-ring transition resize-none"

@@ -9,6 +9,8 @@ export default function JobFormModal({ job, onSubmit, onClose, title }) {
     description: job?.description || "",
     salary: job?.salary || "",
     requirements: job?.requirements || "",
+    interviewProcess: job?.interviewProcess || "",
+    benefits: job?.benefits || "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -108,6 +110,10 @@ export default function JobFormModal({ job, onSubmit, onClose, title }) {
             >
               <option value="FULL_TIME">Full-time</option>
               <option value="PART_TIME">Part-time</option>
+              <option value="CONTRACT">Contract</option>
+              <option value="INTERNSHIP">Internship</option>
+              <option value="REMOTE">Remote</option>
+              <option value="HYBRID">Hybrid</option>
             </select>
           </div>
 
@@ -146,6 +152,34 @@ export default function JobFormModal({ job, onSubmit, onClose, title }) {
               onChange={handleChange}
               rows={2}
               placeholder="e.g. React, Node.js, 2+ years"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Process</label>
+            <textarea
+              name="interviewProcess"
+              value={form.interviewProcess}
+              onChange={handleChange}
+              rows={2}
+              placeholder="Describe the interview stages..."
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Benefits</label>
+            <textarea
+              name="benefits"
+              value={form.benefits}
+              onChange={handleChange}
+              rows={2}
+              placeholder="e.g. Health insurance, flexible hours..."
               className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
                          placeholder:text-gray-400 focus:border-primary focus:outline-none
                          focus:ring-2 focus:ring-primary-ring transition resize-none"
