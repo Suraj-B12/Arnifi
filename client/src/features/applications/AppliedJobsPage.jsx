@@ -35,13 +35,17 @@ export default function AppliedJobsPage() {
   const { data: applications = [], isLoading, isError } = useGetApplicationsQuery();
   const [withdrawApplication, { isLoading: isWithdrawing }] = useWithdrawApplicationMutation();
   const [confirmWithdrawId, setConfirmWithdrawId] = useState(null);
+  const [withdrawingId, setWithdrawingId] = useState(null);
 
   const handleWithdraw = async (appId) => {
+    if (withdrawingId) return; // prevent double-click
+    setWithdrawingId(appId);
     try {
       await withdrawApplication(appId).unwrap();
     } catch {
       // handled by RTK Query
     }
+    setWithdrawingId(null);
     setConfirmWithdrawId(null);
   };
 
@@ -90,7 +94,7 @@ export default function AppliedJobsPage() {
       ) : (
         <div className="space-y-3">
           {applications.map((app) => {
-            const tBadge = typeBadge[app.job.type] || typeBadge.FULL_TIME;
+            const tBadge = typeBadge[app.job?.type] || typeBadge.FULL_TIME;
             const sBadge = statusBadge[app.status] || statusBadge.PENDING;
             return (
               <div
@@ -102,20 +106,20 @@ export default function AppliedJobsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-base font-semibold font-heading text-gray-900 truncate">
-                        {app.job.position}
+                        {app.job?.position ?? "Unknown Position"}
                       </h3>
                       <span className={sBadge.cls}>
                         <span>{sBadge.icon}</span>{sBadge.label}
                       </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                      <span>{app.job.companyName}</span>
+                      <span>{app.job?.companyName}</span>
                       <span className="text-gray-300">·</span>
-                      <span>{app.job.location}</span>
-                      {app.job.salary && (
+                      <span>{app.job?.location}</span>
+                      {app.job?.salary && (
                         <>
                           <span className="text-gray-300">·</span>
-                          <span className="text-green-600 font-medium">{app.job.salary}</span>
+                          <span className="text-green-600 font-medium">{app.job?.salary}</span>
                         </>
                       )}
                     </div>
@@ -161,12 +165,12 @@ export default function AppliedJobsPage() {
                         <span className="text-xs text-gray-500">Withdraw this application?</span>
                         <button
                           onClick={() => handleWithdraw(app.id)}
-                          disabled={isWithdrawing}
+                          disabled={withdrawingId === app.id}
                           className="rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white
                                      hover:bg-red-600 active:scale-[0.97] transition-all duration-150
                                      disabled:opacity-50"
                         >
-                          {isWithdrawing ? "Withdrawing..." : "Confirm"}
+                          {withdrawingId === app.id ? "Withdrawing..." : "Confirm"}
                         </button>
                         <button
                           onClick={() => setConfirmWithdrawId(null)}

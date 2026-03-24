@@ -100,7 +100,7 @@ export default function JobDetailPage() {
             {/* Stats */}
             <div className="mt-4 flex items-center gap-6 text-sm text-gray-500">
               <span>{appCount} applicant{appCount !== 1 ? "s" : ""}</span>
-              <span>{job.viewCount} view{job.viewCount !== 1 ? "s" : ""}</span>
+              {job.viewCount != null && <span>{job.viewCount} view{job.viewCount !== 1 ? "s" : ""}</span>}
               {job.acceptanceRate > 0 && <span>{job.acceptanceRate}% offer rate</span>}
               <span>
                 Posted {new Date(job.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}

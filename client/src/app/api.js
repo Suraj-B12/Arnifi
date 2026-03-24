@@ -21,7 +21,10 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     if (!refreshPromise) {
       refreshPromise = (async () => {
         const refreshToken = api.getState().auth.refreshToken;
-        if (!refreshToken) return null;
+        if (!refreshToken) {
+          api.dispatch({ type: "auth/logout" });
+          return null;
+        }
 
         const refreshResult = await baseQuery(
           { url: "/auth/refresh", method: "POST", body: { refreshToken } },
@@ -39,12 +42,17 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       })();
     }
 
-    const refreshData = await refreshPromise;
-    refreshPromise = null;
+    try {
+      const refreshData = await refreshPromise;
 
-    if (refreshData) {
-      // Retry original request with new token
-      result = await baseQuery(args, api, extraOptions);
+      if (refreshData) {
+        // Retry original request with new token
+        result = await baseQuery(args, api, extraOptions);
+      }
+    } finally {
+      // Only the last waiter clears the promise; all concurrent waiters
+      // share the same promise reference so this is safe.
+      refreshPromise = null;
     }
   }
 

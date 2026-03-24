@@ -1,12 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const storedToken = localStorage.getItem("token");
-const storedUser = localStorage.getItem("user");
 const storedRefreshToken = localStorage.getItem("refreshToken");
+
+let storedUser = null;
+try {
+  const raw = localStorage.getItem("user");
+  if (raw) storedUser = JSON.parse(raw);
+} catch {
+  localStorage.removeItem("user");
+}
 
 const initialState = {
   token: storedToken || null,
-  user: storedUser ? JSON.parse(storedUser) : null,
+  user: storedUser,
   refreshToken: storedRefreshToken || null,
 };
 
@@ -15,13 +22,18 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      state.token = action.payload.token;
-      state.user = action.payload.user;
-      state.refreshToken = action.payload.refreshToken;
-      localStorage.setItem("token", action.payload.token);
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
-      if (action.payload.refreshToken) {
-        localStorage.setItem("refreshToken", action.payload.refreshToken);
+      const { token, user, refreshToken } = action.payload;
+      if (token) {
+        state.token = token;
+        localStorage.setItem("token", token);
+      }
+      if (user) {
+        state.user = user;
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+      if (refreshToken) {
+        state.refreshToken = refreshToken;
+        localStorage.setItem("refreshToken", refreshToken);
       }
     },
     logout: (state) => {

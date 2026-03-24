@@ -5,6 +5,6 @@ import { authenticate } from "../middleware/auth.js";
 const router = Router();
 
 router.get("/", authenticate, getApplications);
-router.delete("/:appId/withdraw", authenticate, withdrawApplication);
+router.patch("/:appId/withdraw", authenticate, withdrawApplication);
 
 export default router;

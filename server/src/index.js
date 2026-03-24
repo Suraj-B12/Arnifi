@@ -1,3 +1,4 @@
+import { mkdirSync } from "fs";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -11,6 +12,14 @@ import applicationsRoutes from "./routes/applications.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import companiesRoutes from "./routes/companies.routes.js";
+
+// Ensure uploads directory exists
+mkdirSync(join(process.cwd(), "uploads/resumes"), { recursive: true });
+
+// Prevent unhandled promise rejections from crashing the server
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled rejection:", reason);
+});
 
 const app = express();
 

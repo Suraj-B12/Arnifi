@@ -16,11 +16,16 @@ export const jobsApi = api.injectEndpoints({
         const { cursor, ...rest } = queryArgs || {};
         return rest;
       },
-      merge: (currentCache, newItems) => {
+      merge: (currentCache, newItems, { arg }) => {
         if (newItems.jobs) {
-          const existingIds = new Set(currentCache.jobs?.map((j) => j.id) || []);
-          const uniqueNew = newItems.jobs.filter((j) => !existingIds.has(j.id));
-          currentCache.jobs = [...(currentCache.jobs || []), ...uniqueNew];
+          // If no cursor, this is a first-page fetch (filter change or initial load) -- replace cache
+          if (!arg?.cursor) {
+            currentCache.jobs = newItems.jobs;
+          } else {
+            const existingIds = new Set(currentCache.jobs?.map((j) => j.id) || []);
+            const uniqueNew = newItems.jobs.filter((j) => !existingIds.has(j.id));
+            currentCache.jobs = [...(currentCache.jobs || []), ...uniqueNew];
+          }
           currentCache.nextCursor = newItems.nextCursor;
           currentCache.hasMore = newItems.hasMore;
         }
@@ -41,7 +46,7 @@ export const jobsApi = api.injectEndpoints({
         method: "POST",
         body: job,
       }),
-      invalidatesTags: [{ type: "Job", id: "LIST" }],
+      invalidatesTags: [{ type: "Job", id: "LIST" }, "Analytics"],
     }),
     updateJob: builder.mutation({
       query: ({ id, ...data }) => ({
@@ -52,6 +57,7 @@ export const jobsApi = api.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [
         { type: "Job", id },
         { type: "Job", id: "LIST" },
+        "Analytics",
       ],
     }),
     deleteJob: builder.mutation({
@@ -62,6 +68,8 @@ export const jobsApi = api.injectEndpoints({
       invalidatesTags: (result, error, id) => [
         { type: "Job", id },
         { type: "Job", id: "LIST" },
+        { type: "Application", id: "LIST" },
+        "Analytics",
       ],
     }),
     applyToJob: builder.mutation({
@@ -69,7 +77,11 @@ export const jobsApi = api.injectEndpoints({
         url: `/jobs/${jobId}/apply`,
         method: "POST",
       }),
-      invalidatesTags: [{ type: "Application", id: "LIST" }],
+      invalidatesTags: (result, error, jobId) => [
+        { type: "Application", id: "LIST" },
+        { type: "Job", id: jobId },
+        { type: "Job", id: "LIST" },
+      ],
     }),
     getJobApplications: builder.query({
       query: (jobId) => `/jobs/${jobId}/applications`,
@@ -84,6 +96,7 @@ export const jobsApi = api.injectEndpoints({
       invalidatesTags: (result, error, { jobId }) => [
         { type: "Application", id: `JOB_${jobId}` },
         { type: "Application", id: "LIST" },
+        "Analytics",
       ],
     }),
     getJob: builder.query({

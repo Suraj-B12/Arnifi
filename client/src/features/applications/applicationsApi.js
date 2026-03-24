@@ -16,9 +16,13 @@ export const applicationsApi = api.injectEndpoints({
     withdrawApplication: builder.mutation({
       query: (appId) => ({
         url: `/applications/${appId}/withdraw`,
-        method: "DELETE",
+        method: "PATCH",
       }),
-      invalidatesTags: [{ type: "Application", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Application", id: "LIST" },
+        { type: "Job", id: "LIST" },
+        "Analytics",
+      ],
     }),
   }),
 });

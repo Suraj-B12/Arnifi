@@ -56,6 +56,7 @@ export default function JobsPage() {
   const [cursor, setCursor] = useState(null);
   const [applyingJobId, setApplyingJobId] = useState(null);
   const sentinelRef = useRef(null);
+  const isFetchingRef = useRef(false);
 
   // Debounce search input
   useEffect(() => {
@@ -83,12 +84,15 @@ export default function JobsPage() {
 
   const jobs = data?.jobs || [];
 
+  // Keep ref in sync so the IntersectionObserver callback never reads stale state
+  isFetchingRef.current = isFetching;
+
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
     if (!sentinelRef.current) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && data?.hasMore && !isFetching) {
+        if (entries[0].isIntersecting && data?.hasMore && !isFetchingRef.current) {
           setCursor(data.nextCursor);
         }
       },

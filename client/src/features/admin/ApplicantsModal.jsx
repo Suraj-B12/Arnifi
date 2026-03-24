@@ -13,7 +13,7 @@ const statusOptions = [
 
 export default function ApplicantsModal({ job, onClose }) {
   const { data: applicants = [], isLoading } = useGetJobApplicationsQuery(job.id);
-  const [updateStatus] = useUpdateApplicationStatusMutation();
+  const [updateStatus, { isLoading: isUpdating }] = useUpdateApplicationStatusMutation();
   const [notes, setNotes] = useState({});
   const [viewingProfile, setViewingProfile] = useState(null);
 
@@ -159,10 +159,12 @@ export default function ApplicantsModal({ job, onClose }) {
                       {(notes[app.id]?.statusNote !== undefined || notes[app.id]?.adminNotes !== undefined) && (
                         <button
                           onClick={() => handleSaveNotes(app.id, app.status)}
+                          disabled={isUpdating}
                           className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white
-                                     hover:bg-primary-hover active:scale-[0.97] transition-all duration-150"
+                                     hover:bg-primary-hover active:scale-[0.97] transition-all duration-150
+                                     disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Save Notes
+                          {isUpdating ? "Saving..." : "Save Notes"}
                         </button>
                       )}
                     </div>

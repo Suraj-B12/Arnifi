@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 
 function sanitize(str, maxLen = 200) {
+  if (typeof str !== "string") return "";
   return str.replace(/<[^>]*>/g, "").trim().slice(0, maxLen);
 }
 

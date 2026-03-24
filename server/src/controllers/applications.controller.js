@@ -22,7 +22,9 @@ export async function applyToJob(req, res) {
       include: { job: true },
     });
 
-    res.status(201).json(application);
+    // Strip adminNotes from user-facing response
+    const { adminNotes: _adminNotes, ...sanitizedApp } = application;
+    res.status(201).json(sanitizedApp);
   } catch (error) {
     if (error.code === "P2002") {
       return res.status(409).json({ message: "You have already applied to this job" });
@@ -141,13 +143,24 @@ export async function withdrawApplication(req, res) {
       return res.status(400).json({ message: "Only pending applications can be withdrawn" });
     }
 
-    const updated = await prisma.application.update({
-      where: { id: appId },
+    // Use updateMany with status check for atomicity (prevents race condition on double-withdraw)
+    const result = await prisma.application.updateMany({
+      where: { id: appId, status: "PENDING" },
       data: { status: "WITHDRAWN", withdrawnAt: new Date() },
+    });
+
+    if (result.count === 0) {
+      return res.status(400).json({ message: "Application is no longer pending" });
+    }
+
+    const updated = await prisma.application.findUnique({
+      where: { id: appId },
       include: { job: true },
     });
 
-    res.json(updated);
+    // Strip adminNotes from user-facing response
+    const { adminNotes, ...sanitized } = updated;
+    res.json(sanitized);
   } catch (error) {
     console.error("Withdraw application error:", error);
     res.status(500).json({ message: "Something went wrong" });

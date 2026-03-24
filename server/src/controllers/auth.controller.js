@@ -39,16 +39,18 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Password must be under 128 characters" });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (existingUser) {
       return res.status(409).json({ message: "An account with this email already exists" });
     }
 
+    const normalizedEmail = email.toLowerCase();
+
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const role = email.endsWith("@arnifi.com") ? "ADMIN" : "USER";
+    const role = normalizedEmail.endsWith("@arnifi.com") ? "ADMIN" : "USER";
 
     const user = await prisma.user.create({
-      data: { name, email: email.toLowerCase(), password: hashedPassword, role },
+      data: { name, email: normalizedEmail, password: hashedPassword, role },
     });
 
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
@@ -77,12 +79,11 @@ export async function login(req, res) {
     }
 
     const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // Always run bcrypt.compare to prevent timing-based user enumeration
+    const DUMMY_HASH = "$2b$12$000000000000000000000uGodOfThunder000000000000000000";
+    const isMatch = await bcrypt.compare(password, user?.password || DUMMY_HASH);
+    if (!user || !isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -118,13 +119,21 @@ export async function refreshTokenHandler(req, res) {
 
     if (!stored || stored.expiresAt < new Date()) {
       if (stored) {
-        await prisma.refreshToken.delete({ where: { id: stored.id } });
+        await prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
       }
       return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
-    // Delete old refresh token (rotation)
-    await prisma.refreshToken.delete({ where: { id: stored.id } });
+    // Delete old refresh token (rotation) — use deleteMany to avoid P2025 crash
+    // on race condition where two concurrent requests use the same token
+    const deleted = await prisma.refreshToken.deleteMany({
+      where: { id: stored.id },
+    });
+
+    // If another concurrent request already consumed this token, fail gracefully
+    if (deleted.count === 0) {
+      return res.status(401).json({ message: "Refresh token already used" });
+    }
 
     // Generate new access token + refresh token
     const token = jwt.sign(

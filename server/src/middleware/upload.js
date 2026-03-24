@@ -1,17 +1,26 @@
 import multer, { diskStorage } from "multer";
-import { extname, join } from "path";
+import { extname, basename, join } from "path";
+
+const ALLOWED_EXTENSIONS = [".pdf"];
 
 const storage = diskStorage({
   destination: join(process.cwd(), "uploads/resumes"),
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = extname(file.originalname);
-    cb(null, `${req.user.userId}-${uniqueSuffix}${ext}`);
+    // Use only the basename to prevent path traversal via crafted originalname
+    const safeName = basename(file.originalname);
+    const ext = extname(safeName).toLowerCase();
+    // Force .pdf extension regardless of what was extracted
+    const safeExt = ALLOWED_EXTENSIONS.includes(ext) ? ext : ".pdf";
+    cb(null, `${req.user.userId}-${uniqueSuffix}${safeExt}`);
   },
 });
 
 function fileFilter(req, file, cb) {
-  if (file.mimetype === "application/pdf") {
+  // Check both MIME type and file extension to prevent spoofing
+  const safeName = basename(file.originalname);
+  const ext = extname(safeName).toLowerCase();
+  if (file.mimetype === "application/pdf" && ALLOWED_EXTENSIONS.includes(ext)) {
     cb(null, true);
   } else {
     cb(new Error("Only PDF files are allowed"), false);
