@@ -7,7 +7,7 @@ A full-stack job application portal with role-based access control. Built with R
 **Frontend:** React 19, Vite, React Router v7, Redux Toolkit (RTK Query), Tailwind CSS v4
 **Backend:** Node.js, Express.js, Prisma ORM, PostgreSQL
 **Auth:** JWT (HS256) + bcrypt
-**Deployment:** Vercel (frontend) + Render (backend) + Neon (database)
+**Deployment:** Render (frontend static site + backend web service) + Neon (database)
 
 ## Getting Started
 
@@ -77,7 +77,56 @@ The client runs at `http://localhost:5173` and the server at `http://localhost:5
 - **Admin:** Users with email ending in `@arnifi.com`
 - **User:** All other registered users
 
+## Project Structure
+
+```
+├── client/                    # React frontend (Vite)
+│   ├── src/
+│   │   ├── app/               # Redux store, RTK Query base API
+│   │   ├── components/        # Navbar, Layout, Route Guards, ScrollReveal
+│   │   ├── features/
+│   │   │   ├── auth/          # Login, Signup, authSlice, authApi
+│   │   │   ├── jobs/          # JobsPage, JobCard, jobsApi
+│   │   │   ├── applications/  # AppliedJobsPage, applicationsApi
+│   │   │   └── admin/         # Dashboard, PostJob, JobFormModal
+│   │   ├── hooks/             # useScrollReveal
+│   │   └── lib/               # cn utility
+│   └── vercel.json            # SPA routing for Vercel
+│
+└── server/                    # Express backend
+    ├── prisma/                # Schema + migrations
+    └── src/
+        ├── config/            # Environment variables
+        ├── controllers/       # Auth, Jobs, Applications handlers
+        ├── lib/               # Prisma client singleton
+        ├── middleware/         # JWT auth, admin role guard
+        └── routes/            # API route definitions
+```
+
+## Design System
+
+| Token | Value |
+|-------|-------|
+| Primary | `#4F46E5` (Indigo 600) |
+| CTA | `#F59E0B` (Amber 500) |
+| Headings | Plus Jakarta Sans Variable |
+| Body | Inter Variable |
+| Background | `#F9FAFB` with dot grid pattern |
+| Cards | White, rounded-2xl, subtle shadow on hover |
+
+## Deployment (Render)
+
+Both frontend and backend deploy from a single repo using `render.yaml` (Render Blueprint).
+
+1. Push to GitHub
+2. Go to [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**
+3. Connect your GitHub repo — Render auto-detects `render.yaml`
+4. Set environment variables:
+   - `arnifi-api`: `DATABASE_URL`, `JWT_SECRET`, `CLIENT_URL` (your frontend URL)
+   - `arnifi-app`: `VITE_API_URL` (your backend URL + `/api`)
+5. Deploy
+
 ## Deployed Links
 
 - **Frontend:** _Coming soon_
-- **Backend:** _Coming soon_
+- **Backend API:** _Coming soon_
