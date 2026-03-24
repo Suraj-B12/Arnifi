@@ -10,6 +10,7 @@ import JobsPage from "./features/jobs/JobsPage";
 import AppliedJobsPage from "./features/applications/AppliedJobsPage";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import PostJobPage from "./features/admin/PostJobPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function AuthRedirect({ children }) {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -46,7 +47,7 @@ export default function App() {
 
         {/* Fallback */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

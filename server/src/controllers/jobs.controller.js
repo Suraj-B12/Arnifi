@@ -1,5 +1,9 @@
 import prisma from "../lib/prisma.js";
 
+function sanitize(str) {
+  return str.replace(/<[^>]*>/g, "").trim().slice(0, 200);
+}
+
 export async function getAllJobs(req, res) {
   try {
     const jobs = await prisma.job.findMany({
@@ -27,10 +31,10 @@ export async function createJob(req, res) {
 
     const job = await prisma.job.create({
       data: {
-        companyName,
-        position,
+        companyName: sanitize(companyName),
+        position: sanitize(position),
         type,
-        location,
+        location: sanitize(location),
         postedById: req.user.userId,
       },
       include: { postedBy: { select: { id: true, name: true } } },
@@ -64,10 +68,10 @@ export async function updateJob(req, res) {
     const updated = await prisma.job.update({
       where: { id },
       data: {
-        ...(companyName && { companyName }),
-        ...(position && { position }),
+        ...(companyName && { companyName: sanitize(companyName) }),
+        ...(position && { position: sanitize(position) }),
         ...(type && { type }),
-        ...(location && { location }),
+        ...(location && { location: sanitize(location) }),
       },
       include: { postedBy: { select: { id: true, name: true } } },
     });

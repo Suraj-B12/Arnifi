@@ -20,11 +20,11 @@ export default function ScrollReveal({
     <div
       ref={ref}
       className={cn(
-        "transition-all duration-500 ease-out",
-        isVisible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${transforms[direction]}`,
+        "transition-all duration-500 ease-out will-change-[opacity,transform]",
+        isVisible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${transforms[direction]} pointer-events-none`,
         className
       )}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ transitionDelay: isVisible ? `${delay}ms` : "0ms" }}
     >
       {children}
     </div>

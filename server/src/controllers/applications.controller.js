@@ -24,6 +24,9 @@ export async function applyToJob(req, res) {
 
     res.status(201).json(application);
   } catch (error) {
+    if (error.code === "P2002") {
+      return res.status(409).json({ message: "You have already applied to this job" });
+    }
     console.error("Apply to job error:", error);
     res.status(500).json({ message: "Something went wrong" });
   }

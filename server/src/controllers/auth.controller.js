@@ -14,8 +14,21 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Name, email, and password are required" });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address" });
+    }
+
+    if (name.length > 100 || email.length > 255) {
+      return res.status(400).json({ message: "Input too long" });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    if (password.length > 128) {
+      return res.status(400).json({ message: "Password must be under 128 characters" });
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });

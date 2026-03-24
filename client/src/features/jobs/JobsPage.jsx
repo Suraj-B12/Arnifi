@@ -69,7 +69,9 @@ export default function JobsPage() {
           Browse Jobs
         </h1>
         <p className="mt-1 text-gray-500">
-          {isLoading ? "Loading..." : `${filteredJobs.length} positions available`}
+          {isLoading
+            ? "Loading..."
+            : `${filteredJobs.length} position${filteredJobs.length !== 1 ? "s" : ""} available`}
         </p>
       </div>
 

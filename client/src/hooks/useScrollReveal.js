@@ -18,7 +18,7 @@ export function useScrollReveal(options = {}) {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: options.threshold || 0.1, rootMargin: options.rootMargin || "0px" }
+      { threshold: options.threshold || 0.05, rootMargin: options.rootMargin || "50px 0px" }
     );
 
     const el = ref.current;
