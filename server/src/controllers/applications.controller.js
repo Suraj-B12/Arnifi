@@ -111,7 +111,10 @@ export async function getApplications(req, res) {
       where: { userId: req.user.userId },
       include: {
         job: {
-          include: { postedBy: { select: { id: true, name: true } } },
+          include: {
+            postedBy: { select: { id: true, name: true } },
+            _count: { select: { applications: true } },
+          },
         },
       },
       orderBy: { createdAt: "desc" },

@@ -117,7 +117,7 @@ export default function AdminDashboard() {
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Company</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Applicants</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-36">Applicants</th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
               </tr>
             </thead>
@@ -139,14 +139,14 @@ export default function AdminDashboard() {
                       <button
                         onClick={() => setViewingApplicants(job)}
                         className="inline-flex items-center gap-1.5 rounded-full border border-primary-ring/50 bg-primary-light
-                                   px-3 py-1.5 text-xs font-semibold text-primary
+                                   px-3 py-1.5 text-xs font-semibold text-primary whitespace-nowrap
                                    hover:bg-primary hover:text-white hover:border-primary
                                    active:scale-[0.97] transition-all duration-150"
                       >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-1.053M18 7.5a3 3 0 11-6 0 3 3 0 016 0zm-8.25 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                         </svg>
-                        {appCount} Applicants
+                        {appCount} Applicant{appCount !== 1 ? "s" : ""}
                       </button>
                     </td>
                     <td className="px-6 py-4 text-right">

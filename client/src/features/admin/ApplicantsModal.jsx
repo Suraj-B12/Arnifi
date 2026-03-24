@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetJobApplicationsQuery, useUpdateApplicationStatusMutation } from "../jobs/jobsApi";
 import ApplicantProfileModal from "./ApplicantProfileModal";
 
@@ -16,6 +16,23 @@ export default function ApplicantsModal({ job, onClose }) {
   const [updateStatus, { isLoading: isUpdating }] = useUpdateApplicationStatusMutation();
   const [notes, setNotes] = useState({});
   const [viewingProfile, setViewingProfile] = useState(null);
+  const [toast, setToast] = useState(null); // { type: "success" | "error", message: string }
+  const closeTimerRef = useRef(null);
+  const toastTimerRef = useRef(null);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(closeTimerRef.current);
+      clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 2000);
+  };
 
   const getNote = (appId, field) => notes[appId]?.[field] ?? "";
   const setNote = (appId, field, value) =>
@@ -30,8 +47,10 @@ export default function ApplicantsModal({ job, onClose }) {
         statusNote: notes[appId]?.statusNote,
         adminNotes: notes[appId]?.adminNotes,
       }).unwrap();
+      showToast("success", "Changes saved successfully");
+      closeTimerRef.current = setTimeout(() => onClose(), 1500);
     } catch {
-      // handled by RTK Query
+      showToast("error", "Failed to save changes");
     }
   };
 
@@ -44,8 +63,10 @@ export default function ApplicantsModal({ job, onClose }) {
         statusNote: notes[appId]?.statusNote,
         adminNotes: notes[appId]?.adminNotes,
       }).unwrap();
+      showToast("success", "Changes saved successfully");
+      closeTimerRef.current = setTimeout(() => onClose(), 1500);
     } catch {
-      // handled by RTK Query
+      showToast("error", "Failed to save changes");
     }
   };
 
@@ -69,7 +90,19 @@ export default function ApplicantsModal({ job, onClose }) {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="relative flex-1 overflow-y-auto p-6">
+          {/* Toast notification */}
+          {toast && (
+            <div
+              className={`sticky top-0 z-10 mb-4 rounded-xl px-4 py-2.5 text-sm font-medium text-white text-center shadow-lg transition-all duration-300 ${
+                toast.type === "success"
+                  ? "bg-emerald-500"
+                  : "bg-red-500"
+              }`}
+            >
+              {toast.message}
+            </div>
+          )}
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (

@@ -12,6 +12,7 @@ export const applicationsApi = api.injectEndpoints({
             ]
           : [{ type: "Application", id: "LIST" }],
       keepUnusedDataFor: 60,
+      refetchOnMountOrArgChange: true,
     }),
     withdrawApplication: builder.mutation({
       query: (appId) => ({

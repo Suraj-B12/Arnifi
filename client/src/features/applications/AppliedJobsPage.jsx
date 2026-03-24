@@ -49,6 +49,20 @@ export default function AppliedJobsPage() {
     setConfirmWithdrawId(null);
   };
 
+  // Compute status breakdown for stats
+  const statusCounts = applications.reduce((acc, app) => {
+    acc[app.status] = (acc[app.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statCards = [
+    { label: "Total", value: applications.length, cls: "bg-gray-800 text-white" },
+    { label: "Pending", value: statusCounts.PENDING || 0, cls: "bg-gray-100 text-gray-800" },
+    { label: "Interview", value: statusCounts.INTERVIEW || 0, cls: "bg-amber-50 text-amber-700" },
+    { label: "Offers", value: statusCounts.OFFER || 0, cls: "bg-emerald-50 text-emerald-700" },
+    { label: "Rejected", value: statusCounts.REJECTED || 0, cls: "bg-gray-50 text-gray-500" },
+  ];
+
   return (
     <div>
       <div className="mb-8">
@@ -59,6 +73,18 @@ export default function AppliedJobsPage() {
           {isLoading ? "Loading..." : `${applications.length} application${applications.length !== 1 ? "s" : ""}`}
         </p>
       </div>
+
+      {/* Stats overview */}
+      {!isLoading && applications.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+          {statCards.map((s) => (
+            <div key={s.label} className={`rounded-2xl border border-gray-200 p-4 ${s.cls}`}>
+              <p className="text-xs font-medium opacity-70">{s.label}</p>
+              <p className="mt-1 text-2xl font-bold font-heading">{s.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="space-y-4">
@@ -141,11 +167,20 @@ export default function AppliedJobsPage() {
                   </div>
                 </div>
 
+                {/* Competition stats */}
+                {app.job?._count?.applications > 0 && (
+                  <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
+                    <span>{app.job._count.applications} total applicant{app.job._count.applications !== 1 ? "s" : ""}</span>
+                    {app.job?.viewCount > 0 && <span>{app.job.viewCount} views</span>}
+                  </div>
+                )}
+
                 {/* Status note from admin */}
                 {app.statusNote && (
-                  <p className="mt-2 text-xs text-gray-500 italic">
-                    Note: {app.statusNote}
-                  </p>
+                  <div className="mt-2 rounded-lg bg-blue-50 border border-blue-100 px-3 py-2">
+                    <p className="text-xs font-medium text-blue-700">Note from recruiter:</p>
+                    <p className="text-xs text-blue-600 mt-0.5">{app.statusNote}</p>
+                  </div>
                 )}
 
                 {/* Show reviewed date if available */}
