@@ -8,49 +8,92 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
+  id           String         @id @default(cuid())
   name         String
-  email        String        @unique
+  email        String         @unique
   password     String
-  role         Role          @default(USER)
-  createdAt    DateTime      @default(now())
+  role         Role           @default(USER)
+  headline     String?
+  skills       String?
+  experience   String?
+  education    String?
+  resumeUrl    String?
+  phone        String?
+  linkedIn     String?
+  bio          String?
+  createdAt    DateTime       @default(now())
   jobs         Job[]
   applications Application[]
+  refreshTokens RefreshToken[]
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  logo      String?
+  about     String?
+  website   String?
+  industry  String?
+  size      String?
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobs      Job[]
 }
 
 model Job {
-  id           String        @id @default(cuid())
-  companyName  String
-  position     String
-  type         JobType
-  location     String
-  description  String?
-  salary       String?
-  requirements String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  postedBy     User          @relation(fields: [postedById], references: [id])
-  postedById   String
-  applications Application[]
+  id               String        @id @default(cuid())
+  companyName      String
+  position         String
+  type             JobType
+  location         String
+  description      String?
+  salary           String?
+  requirements     String?
+  viewCount        Int           @default(0)
+  interviewProcess String?
+  benefits         String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  postedBy         User          @relation(fields: [postedById], references: [id])
+  postedById       String
+  company          Company?      @relation(fields: [companyId], references: [id])
+  companyId        String?
+  applications     Application[]
 
   @@index([postedById])
+  @@index([companyId])
 }
 
 model Application {
-  id         String            @id @default(cuid())
-  user       User              @relation(fields: [userId], references: [id])
-  userId     String
-  job        Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId      String
-  status     ApplicationStatus @default(PENDING)
-  reviewedAt DateTime?
-  notes      String?
-  createdAt  DateTime          @default(now())
+  id          String            @id @default(cuid())
+  user        User              @relation(fields: [userId], references: [id])
+  userId      String
+  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId       String
+  status      ApplicationStatus @default(PENDING)
+  reviewedAt  DateTime?
+  adminNotes  String?
+  statusNote  String?
+  withdrawnAt DateTime?
+  createdAt   DateTime          @default(now())
 
   @@unique([userId, jobId])
   @@index([userId])
   @@index([jobId])
   @@index([status])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
 }
 
 enum Role {
@@ -61,6 +104,10 @@ enum Role {
 enum JobType {
   FULL_TIME
   PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+  HYBRID
 }
 
 enum ApplicationStatus {
@@ -69,4 +116,5 @@ enum ApplicationStatus {
   INTERVIEW
   OFFER
   REJECTED
+  WITHDRAWN
 }
