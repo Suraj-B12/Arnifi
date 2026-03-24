@@ -3,8 +3,9 @@ const typeBadge = {
   PART_TIME: { label: "Part-time", cls: "bg-purple-100 text-purple-800" },
 };
 
-export default function JobCard({ job, onApply, applying, applied }) {
+export default function JobCard({ job, onApply, applying, applied, isAdmin }) {
   const badge = typeBadge[job.type] || typeBadge.FULL_TIME;
+  const appCount = job._count?.applications || 0;
 
   return (
     <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm
@@ -21,7 +22,12 @@ export default function JobCard({ job, onApply, applying, applied }) {
         </span>
       </div>
 
-      <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
+      {/* Description preview */}
+      {job.description && (
+        <p className="mt-2 text-xs text-gray-400 line-clamp-2">{job.description}</p>
+      )}
+
+      <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
         <span className="inline-flex items-center gap-1">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -29,6 +35,17 @@ export default function JobCard({ job, onApply, applying, applied }) {
           </svg>
           {job.location}
         </span>
+        {job.salary && (
+          <>
+            <span className="text-gray-300">|</span>
+            <span className="text-green-600 font-medium">{job.salary}</span>
+          </>
+        )}
+      </div>
+
+      {/* Stats row */}
+      <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+        <span>{appCount} applicant{appCount !== 1 ? "s" : ""}</span>
         <span className="text-gray-300">|</span>
         <span>
           {new Date(job.createdAt).toLocaleDateString("en-US", {
@@ -38,7 +55,8 @@ export default function JobCard({ job, onApply, applying, applied }) {
         </span>
       </div>
 
-      {onApply && (
+      {/* Apply button (users only) */}
+      {!isAdmin && onApply && (
         <div className="mt-5">
           <button
             onClick={() => onApply(job.id)}

@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useSelector } from "react-redux";
+import { selectIsAdmin } from "../auth/authSlice";
 import { useGetJobsQuery, useApplyToJobMutation } from "./jobsApi";
 import { useGetApplicationsQuery } from "../applications/applicationsApi";
 import JobCard from "./JobCard";
@@ -24,6 +26,7 @@ function SkeletonCard() {
 }
 
 export default function JobsPage() {
+  const isAdmin = useSelector(selectIsAdmin);
   const { data: jobs = [], isLoading, isError } = useGetJobsQuery();
   const { data: applications = [] } = useGetApplicationsQuery();
   const [applyToJob, { isLoading: applyingId }] = useApplyToJobMutation();
@@ -146,9 +149,10 @@ export default function JobsPage() {
             <ScrollReveal key={job.id} delay={Math.min(i * 60, 300)}>
               <JobCard
                 job={job}
-                onApply={handleApply}
+                onApply={isAdmin ? null : handleApply}
                 applying={applyingJobId === job.id}
                 applied={appliedJobIds.has(job.id)}
+                isAdmin={isAdmin}
               />
             </ScrollReveal>
           ))}

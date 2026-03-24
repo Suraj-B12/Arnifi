@@ -5,6 +5,14 @@ const typeBadge = {
   PART_TIME: { label: "Part-time", cls: "bg-purple-100 text-purple-800" },
 };
 
+const statusBadge = {
+  PENDING:   { label: "Awaiting Review", cls: "bg-gray-100 text-gray-700" },
+  REVIEWED:  { label: "Under Review",   cls: "bg-blue-100 text-blue-700" },
+  INTERVIEW: { label: "Interview Stage", cls: "bg-amber-100 text-amber-800" },
+  OFFER:     { label: "Offer Extended",  cls: "bg-green-100 text-green-700" },
+  REJECTED:  { label: "Not Selected",    cls: "bg-red-50 text-red-600" },
+};
+
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 animate-pulse">
@@ -60,39 +68,61 @@ export default function AppliedJobsPage() {
       ) : (
         <div className="space-y-3">
           {applications.map((app) => {
-            const badge = typeBadge[app.job.type] || typeBadge.FULL_TIME;
+            const tBadge = typeBadge[app.job.type] || typeBadge.FULL_TIME;
+            const sBadge = statusBadge[app.status] || statusBadge.PENDING;
             return (
               <div
                 key={app.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-2xl
-                           border border-gray-200 bg-white p-5 transition-all duration-200
+                className="rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200
                            hover:shadow-sm hover:border-primary-ring"
               >
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold font-heading text-gray-900 truncate">
-                    {app.job.position}
-                  </h3>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                    <span>{app.job.companyName}</span>
-                    <span className="text-gray-300">·</span>
-                    <span>{app.job.location}</span>
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base font-semibold font-heading text-gray-900 truncate">
+                        {app.job.position}
+                      </h3>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sBadge.cls}`}>
+                        {sBadge.label}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                      <span>{app.job.companyName}</span>
+                      <span className="text-gray-300">·</span>
+                      <span>{app.job.location}</span>
+                      {app.job.salary && (
+                        <>
+                          <span className="text-gray-300">·</span>
+                          <span className="text-green-600 font-medium">{app.job.salary}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${tBadge.cls}`}>
+                      {tBadge.label}
+                    </span>
+                    <div className="text-xs text-gray-400">
+                      <span>Applied </span>
+                      <span>
+                        {new Date(app.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>
-                    {badge.label}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                    <span>Applied</span>
-                    <span>
-                      {new Date(app.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-                </div>
+                {/* Show reviewed date if available */}
+                {app.reviewedAt && (
+                  <p className="mt-2 text-xs text-gray-400">
+                    Last updated {new Date(app.reviewedAt).toLocaleDateString("en-US", {
+                      month: "short", day: "numeric", year: "numeric",
+                    })}
+                  </p>
+                )}
               </div>
             );
           })}
