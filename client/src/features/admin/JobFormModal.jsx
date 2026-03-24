@@ -6,6 +6,9 @@ export default function JobFormModal({ job, onSubmit, onClose, title }) {
     position: job?.position || "",
     type: job?.type || "FULL_TIME",
     location: job?.location || "",
+    description: job?.description || "",
+    salary: job?.salary || "",
+    requirements: job?.requirements || "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -106,6 +109,47 @@ export default function JobFormModal({ job, onSubmit, onClose, title }) {
               <option value="FULL_TIME">Full-time</option>
               <option value="PART_TIME">Part-time</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Describe the role..."
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Salary Range</label>
+            <input
+              name="salary"
+              value={form.salary}
+              onChange={handleChange}
+              placeholder="e.g. 50k-70k AED/year"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Requirements</label>
+            <textarea
+              name="requirements"
+              value={form.requirements}
+              onChange={handleChange}
+              rows={2}
+              placeholder="e.g. React, Node.js, 2+ years"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
           </div>
 
           <div className="flex gap-3 pt-2">

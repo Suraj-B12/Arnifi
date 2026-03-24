@@ -11,6 +11,9 @@ export default function PostJobPage() {
     position: "",
     type: "FULL_TIME",
     location: "",
+    description: "",
+    salary: "",
+    requirements: "",
   });
   const [error, setError] = useState("");
 
@@ -102,6 +105,47 @@ export default function PostJobPage() {
               <option value="FULL_TIME">Full-time</option>
               <option value="PART_TIME">Part-time</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Description <span className="text-gray-400 font-normal">(optional)</span></label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Describe the role and responsibilities..."
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Salary Range <span className="text-gray-400 font-normal">(optional)</span></label>
+            <input
+              name="salary"
+              value={form.salary}
+              onChange={handleChange}
+              placeholder="e.g. 50k-70k AED/year"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Requirements <span className="text-gray-400 font-normal">(optional)</span></label>
+            <textarea
+              name="requirements"
+              value={form.requirements}
+              onChange={handleChange}
+              rows={3}
+              placeholder="e.g. React, Node.js, 2+ years experience"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm
+                         placeholder:text-gray-400 focus:border-primary focus:outline-none
+                         focus:ring-2 focus:ring-primary-ring transition resize-none"
+            />
           </div>
 
           <button

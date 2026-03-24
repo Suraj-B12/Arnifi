@@ -3,6 +3,7 @@ import { useGetJobsQuery, useDeleteJobMutation, useUpdateJobMutation } from "../
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../auth/authSlice";
 import JobFormModal from "./JobFormModal";
+import ApplicantsModal from "./ApplicantsModal";
 
 const typeBadge = {
   FULL_TIME: { label: "Full-time", cls: "bg-blue-100 text-blue-800" },
@@ -16,10 +17,11 @@ export default function AdminDashboard() {
   const [updateJob] = useUpdateJobMutation();
 
   const [editingJob, setEditingJob] = useState(null);
+  const [viewingApplicants, setViewingApplicants] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  // Only show jobs posted by this admin
   const myJobs = allJobs.filter((j) => j.postedById === user?.id);
+  const totalApplications = myJobs.reduce((sum, j) => sum + (j._count?.applications || 0), 0);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this job posting?")) return;
@@ -54,11 +56,17 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <div className="rounded-2xl border border-gray-200 bg-white p-5">
           <p className="text-sm font-medium text-gray-500">Total Postings</p>
           <p className="mt-1 text-2xl font-bold font-heading text-gray-900">
             {isLoading ? "—" : myJobs.length}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
+          <p className="text-sm font-medium text-gray-500">Applications</p>
+          <p className="mt-1 text-2xl font-bold font-heading text-primary">
+            {isLoading ? "—" : totalApplications}
           </p>
         </div>
         <div className="rounded-2xl border border-gray-200 bg-white p-5">
@@ -96,13 +104,14 @@ export default function AdminDashboard() {
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Company</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Applicants</th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {myJobs.map((job) => {
                 const badge = typeBadge[job.type] || typeBadge.FULL_TIME;
+                const appCount = job._count?.applications || 0;
                 return (
                   <tr key={job.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{job.position}</td>
@@ -113,8 +122,16 @@ export default function AdminDashboard() {
                         {badge.label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(job.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => setViewingApplicants(job)}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition"
+                      >
+                        <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-full bg-primary/10 px-2 text-xs font-bold text-primary">
+                          {appCount}
+                        </span>
+                        View
+                      </button>
                     </td>
                     <td className="px-6 py-4 text-right space-x-2">
                       <button
@@ -147,6 +164,14 @@ export default function AdminDashboard() {
           onSubmit={handleUpdate}
           onClose={() => setEditingJob(null)}
           title="Edit Job"
+        />
+      )}
+
+      {/* Applicants Modal */}
+      {viewingApplicants && (
+        <ApplicantsModal
+          job={viewingApplicants}
+          onClose={() => setViewingApplicants(null)}
         />
       )}
     </div>
