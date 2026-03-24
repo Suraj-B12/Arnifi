@@ -7,11 +7,7 @@ import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
 import AppLayout from "./components/AppLayout";
 import JobsPage from "./features/jobs/JobsPage";
-
-// Placeholders (will be replaced with real pages)
-function AppliedJobsPage() {
-  return <div className="text-gray-500 text-center py-20">Applied jobs coming soon...</div>;
-}
+import AppliedJobsPage from "./features/applications/AppliedJobsPage";
 function AdminDashboard() {
   return <div className="text-gray-500 text-center py-20">Admin dashboard coming soon...</div>;
 }
