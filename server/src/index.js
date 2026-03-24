@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { PORT, CLIENT_URL } from "./config/env.js";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+// Routes
+app.use("/api/auth", authRoutes);
 
 // Start server
 app.listen(PORT, () => {
