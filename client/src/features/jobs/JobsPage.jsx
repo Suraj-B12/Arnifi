@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useGetJobsQuery, useApplyToJobMutation } from "./jobsApi";
 import { useGetApplicationsQuery } from "../applications/applicationsApi";
 import JobCard from "./JobCard";
+import ScrollReveal from "../../components/ScrollReveal";
 
 function SkeletonCard() {
   return (
@@ -139,14 +140,15 @@ export default function JobsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredJobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              onApply={handleApply}
-              applying={applyingJobId === job.id}
-              applied={appliedJobIds.has(job.id)}
-            />
+          {filteredJobs.map((job, i) => (
+            <ScrollReveal key={job.id} delay={Math.min(i * 60, 300)}>
+              <JobCard
+                job={job}
+                onApply={handleApply}
+                applying={applyingJobId === job.id}
+                applied={appliedJobIds.has(job.id)}
+              />
+            </ScrollReveal>
           ))}
         </div>
       )}
