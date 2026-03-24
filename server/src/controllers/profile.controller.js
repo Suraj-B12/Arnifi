@@ -103,12 +103,13 @@ export async function serveResume(req, res) {
     }
 
     const filename = user.resumeName || "resume.pdf";
+    const buffer = Buffer.from(user.resumeData);
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="${filename}"`,
-      "Content-Length": user.resumeData.length,
+      "Content-Length": buffer.length,
     });
-    res.send(user.resumeData);
+    res.end(buffer);
   } catch (error) {
     console.error("Serve resume error:", error);
     res.status(500).json({ message: "Something went wrong" });
