@@ -6,11 +6,9 @@ import SignupPage from "./features/auth/SignupPage";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
 import AppLayout from "./components/AppLayout";
+import JobsPage from "./features/jobs/JobsPage";
 
-// Lazy placeholders (will be replaced with real pages)
-function JobsPage() {
-  return <div className="text-gray-500 text-center py-20">Jobs listing coming soon...</div>;
-}
+// Placeholders (will be replaced with real pages)
 function AppliedJobsPage() {
   return <div className="text-gray-500 text-center py-20">Applied jobs coming soon...</div>;
 }
