@@ -8,12 +8,8 @@ import RequireAdmin from "./components/RequireAdmin";
 import AppLayout from "./components/AppLayout";
 import JobsPage from "./features/jobs/JobsPage";
 import AppliedJobsPage from "./features/applications/AppliedJobsPage";
-function AdminDashboard() {
-  return <div className="text-gray-500 text-center py-20">Admin dashboard coming soon...</div>;
-}
-function PostJobPage() {
-  return <div className="text-gray-500 text-center py-20">Post job coming soon...</div>;
-}
+import AdminDashboard from "./features/admin/AdminDashboard";
+import PostJobPage from "./features/admin/PostJobPage";
 
 function AuthRedirect({ children }) {
   const isAuthenticated = useSelector(selectIsAuthenticated);
