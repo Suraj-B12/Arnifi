@@ -131,7 +131,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 text-sm text-gray-600">{job.companyName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{job.location}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${badge.cls}`}>
                         {badge.label}
                       </span>
                     </td>
